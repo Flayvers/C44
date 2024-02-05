@@ -14,6 +14,8 @@ public class MainActivity extends AppCompatActivity {
     EditText nomCompte;
     TextView solde;
 
+    EditText destinataire;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
         boutonValider = findViewById(R.id.Valider);
         nomCompte = findViewById(R.id.NomCompte);
         solde = findViewById(R.id.Solde);
+        destinataire = findViewById(R.id.DestinaireMail);
 
         ec = new Listener();
         boutonValider.setOnClickListener(ec);
@@ -35,7 +38,17 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onClick(View v) {
-                    solde.setText("pue sa mere");
+                    if (nomCompte.getText().toString().equals("epargne")) {
+                        solde.setText("xxx.xx$");
+                    } else if (nomCompte.getText().toString().equals("cheque")) {
+                        solde.setText("xxx.xx$");
+                    } else if(nomCompte.getText().toString().equals("epargne+")){
+                        solde.setText("xxx.xx$");
+                    }
+                    else{
+                        solde.setText("Nom de compte invalide");
+                    }
+
                 }
             }
         }
