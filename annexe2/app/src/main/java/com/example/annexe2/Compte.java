@@ -17,7 +17,7 @@ public class Compte {
 
     // Setter pour solde
     public void setSolde(double solde) {
-        this.solde = solde;
+        this.solde -= solde;
     }
 
     // Getter pour nom

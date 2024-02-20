@@ -10,17 +10,23 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
     Button boutonValider;
     Spinner nomCompte;
     TextView solde;
     EditText destinataire;
+    EditText montant;
 
+    String selectedAccount;
     Hashtable<String, Compte> comptes;
 
     DecimalFormat dc;
@@ -33,15 +39,19 @@ public class MainActivity extends AppCompatActivity {
         nomCompte = findViewById(R.id.SpinnerNomCompte);
         solde = findViewById(R.id.Solde);
         destinataire = findViewById(R.id.DestinataireMail);
+        montant = findViewById(R.id.Montant);
 
         comptes = new Hashtable<>();
-        comptes.put("epargne", new Compte(1000, "epargne"));
-        comptes.put("epargne+", new Compte(2000, "epargne+"));
-        comptes.put("credit", new Compte(500, "credit"));
+        comptes.put("epargne", new Compte(1000, "EPARGNE"));
+        comptes.put("epargne+", new Compte(2000, "EPARGNE PLUS"));
+        comptes.put("credit", new Compte(500, "CREDIT"));
+        comptes.put("cheque", new Compte(500, "CHEQUE"));
 
         dc = new DecimalFormat("0.00$");
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new ArrayList<>(comptes.keySet()));
+        ArrayList<String> sortedList = new ArrayList<>(comptes.keySet());
+        Collections.sort(sortedList);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sortedList);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         nomCompte.setAdapter(adapter);
 
@@ -50,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // Obtenir la clé du compte sélectionné
-                String selectedAccount = parent.getItemAtPosition(position).toString();
+                selectedAccount = parent.getItemAtPosition(position).toString();
                 // Récupérer le compte correspondant à partir de la Hashtable
                 Compte compte = comptes.get(selectedAccount);
                 // Mettre à jour le TextView avec le solde du compte
@@ -64,11 +74,31 @@ public class MainActivity extends AppCompatActivity {
         });
 
         boutonValider = findViewById(R.id.Envoyer);
-        boutonValider.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Gérer le clic sur le bouton de validation ici
+        boutonValider.setOnClickListener(v -> {
+
+            String regex_mail = "^[\\w\\.-]+@([\\w\\.-]+\\.)+[\\w-]{2,4}$";
+            double montant_float = Double.valueOf(montant.getText().toString());
+            Toast toast;
+
+            if (destinataire.getText().toString().matches(regex_mail)){
+                if (montant_float >= comptes.get(selectedAccount).getSolde()){
+                    toast = Toast.makeText(this, "Transfert refusé. Solde insuffisant", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+                else {
+                    comptes.get(selectedAccount).setSolde(montant_float);
+
+                    solde.setText(dc.format(comptes.get(selectedAccount).getSolde()));
+                }
             }
+            else{
+                toast = Toast.makeText(this, "Adresse mail invalide !", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+
+
+
+
         });
     }
 }
