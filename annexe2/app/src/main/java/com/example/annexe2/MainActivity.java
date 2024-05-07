@@ -1,7 +1,9 @@
 package com.example.annexe2;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -10,95 +12,105 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Hashtable;
+import java.util.Set;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
-    Button boutonValider;
-    Spinner nomCompte;
+
+    Ecouteur ec;
+    Button envoyer;
+    Spinner champ_nom_compte;
+    EditText champ_a;
     TextView solde;
-    EditText destinataire;
-    EditText montant;
+    EditText transfert;
+    Vector<String> choix = new Vector<>();
+    DecimalFormat df;
+    Hashtable<String, compte> listeComptes;
+    String compte;
 
-    String selectedAccount;
-    Hashtable<String, Compte> comptes;
-
-    DecimalFormat dc;
+    public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
+            Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+    public static boolean validate(String emailStr) {
+        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(emailStr);
+        return matcher.matches();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        nomCompte = findViewById(R.id.SpinnerNomCompte);
-        solde = findViewById(R.id.Solde);
-        destinataire = findViewById(R.id.DestinataireMail);
-        montant = findViewById(R.id.Montant);
+        listeComptes = new Hashtable<>();
+        listeComptes.put("Epargne", new compte("Epargne", 500));
+        listeComptes.put("Cheque", new compte("Cheque", 700));
+        listeComptes.put("EpargnePlus", new compte("EpargnePlus", 250));
+        Set<String> ensCles = listeComptes.keySet();
+        choix = new Vector<>(ensCles);
 
-        comptes = new Hashtable<>();
-        comptes.put("epargne", new Compte(1000, "EPARGNE"));
-        comptes.put("epargne+", new Compte(2000, "EPARGNE PLUS"));
-        comptes.put("credit", new Compte(500, "CREDIT"));
-        comptes.put("cheque", new Compte(500, "CHEQUE"));
+        df = new DecimalFormat("0.00$");
 
-        dc = new DecimalFormat("0.00$");
+        //Initialiser les variables
+        envoyer = findViewById(R.id.envoyer);
+        champ_nom_compte = findViewById(R.id.nom_de);
+        champ_a = findViewById(R.id.nom_a);
+        solde = findViewById(R.id.solde);
+        transfert = findViewById(R.id.transfert);
 
-        ArrayList<String> sortedList = new ArrayList<>(comptes.keySet());
-        Collections.sort(sortedList);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sortedList);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        nomCompte.setAdapter(adapter);
+        ArrayAdapter<String> ar = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,choix);
+        champ_nom_compte.setAdapter(ar);
 
-        // Ajout d'un écouteur d'événements au Spinner pour détecter la sélection de l'utilisateur
-        nomCompte.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // Obtenir la clé du compte sélectionné
-                selectedAccount = parent.getItemAtPosition(position).toString();
-                // Récupérer le compte correspondant à partir de la Hashtable
-                Compte compte = comptes.get(selectedAccount);
-                // Mettre à jour le TextView avec le solde du compte
-                solde.setText(dc.format(compte.getSolde()));
-            }
+        //Premiere étape, créer l'écouteur
+        ec = new Ecouteur();
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Ne rien faire en cas de sélection vide
-            }
-        });
+        //Deuxième étape, inscrire la source à l'écouteur
+        envoyer.setOnClickListener(ec);
+        champ_nom_compte.setOnItemSelectedListener(ec);
 
-        boutonValider = findViewById(R.id.Envoyer);
-        boutonValider.setOnClickListener(v -> {
 
-            String regex_mail = "^[\\w\\.-]+@([\\w\\.-]+\\.)+[\\w-]{2,4}$";
-            double montant_float = Double.valueOf(montant.getText().toString());
-            Toast toast;
+    }
 
-            if (destinataire.getText().toString().matches(regex_mail)){
-                if (montant_float >= comptes.get(selectedAccount).getSolde()){
-                    toast = Toast.makeText(this, "Transfert refusé. Solde insuffisant", Toast.LENGTH_SHORT);
-                    toast.show();
+    private class Ecouteur implements View.OnClickListener, AdapterView.OnItemSelectedListener {
+
+
+        @Override
+        public void onClick(View v) {
+
+
+
+
+            double solde_num = listeComptes.get(compte).getSolde();
+            double transfert_num = Double.parseDouble(transfert.getText().toString());
+
+            if (validate(champ_a.getText().toString())) {
+                if (transfert_num < solde_num) {
+                    listeComptes.get(compte).diminuer_solde( transfert_num );
+                    solde.setText( df.format( listeComptes.get(compte).getSolde()) );
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Send $$")
+                            .setMessage("Are you sure you want to send")
+                            .show();
                 }
-                else {
-                    comptes.get(selectedAccount).setSolde(montant_float);
-
-                    solde.setText(dc.format(comptes.get(selectedAccount).getSolde()));
-                }
+            } else {
+                champ_a.setText("");
+                champ_a.setHint("Indiquer un destinataire");
             }
-            else{
-                toast = Toast.makeText(this, "Adresse mail invalide !", Toast.LENGTH_SHORT);
-                toast.show();
-            }
+        }
 
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            compte = choix.get(position);
+            solde.setText( df.format( listeComptes.get(compte).getSolde()) );
 
+        }
 
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
 
-        });
+        }
     }
 }

@@ -1,33 +1,24 @@
 package com.example.annexe2;
 
-public class Compte {
-    private double solde;
-    private String nom;
+public class compte {
 
-    // Constructeur
-    public Compte(double solde, String nom) {
+    String nom_compte;
+    Double solde;
+
+    public compte(String nom, double solde){
+        this.nom_compte = nom;
         this.solde = solde;
-        this.nom = nom;
     }
 
-    // Getter pour solde
-    public double getSolde() {
+    public Double getSolde() {
         return solde;
     }
 
-    // Setter pour solde
-    public void setSolde(double solde) {
-        this.solde -= solde;
+    public String getNom_compte() {
+        return nom_compte;
     }
 
-    // Getter pour nom
-    public String getNom() {
-        return nom;
-    }
-
-    // Setter pour nom
-    public void setNom(String nom) {
-        this.nom = nom;
+    public void diminuer_solde(Double transfert) {
+        this.solde -= transfert;
     }
 }
-

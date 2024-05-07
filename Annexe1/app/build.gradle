@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.annexe1'
+    namespace 'alek.delBalso.inc'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.annexe1"
+        applicationId "alek.delBalso.inc"
         minSdk 24
         targetSdk 33
         versionCode 1
