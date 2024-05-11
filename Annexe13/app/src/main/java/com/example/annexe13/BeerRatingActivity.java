@@ -38,13 +38,15 @@ public class BeerRatingActivity extends AppCompatActivity {
         DatabaseHelper dbHelper = DatabaseHelper.getInstance(this);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
+        // Enregistrement des données dans la table BeerRatings
         ContentValues values = new ContentValues();
         values.put("beerName", beerName);
         values.put("brewery", brewery);
         values.put("rating", rating);
 
         db.insert("BeerRatings", null, values);
-        db.close();
+
+        db.close(); // Assurez-vous de fermer la base de données après utilisation
 
         Toast.makeText(this, "Beer rating saved!", Toast.LENGTH_SHORT).show();
 
