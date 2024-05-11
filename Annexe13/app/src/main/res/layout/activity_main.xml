@@ -1,0 +1,27 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="Main Menu"
+        android:textSize="24sp" />
+
+    <Button
+        android:id="@+id/button_rate_beer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Rate Beer" />
+
+    <Button
+        android:id="@+id/button_view_rankings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View Rankings" />
+
+</LinearLayout>
